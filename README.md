@@ -24,36 +24,30 @@
 npm install
 ```
 
-### 2. 配置环境变量
+### 2. 配置
 
-复制 `.env.example` 为 `.env` 并配置：
+在用户主目录创建 `~/feishu-agent.json` 配置文件：
 
 ```bash
-cp .env.example .env
+vim ~/feishu-agent.json
 ```
 
-编辑 `.env` 文件：
+添加以下内容：
 
+```json
+{
+  "APP_ID": "你的飞书应用AppID",
+  "APP_SECRET": "你的飞书应用AppSecret",
+  "VERIFICATION_TOKEN": "你的验证Token",
+  "ENCRYPT_KEY": "你的加密Key",
+  "ANTHROPIC_BASE_URL": "https://api.minimaxi.com/anthropic",
+  "ANTHROPIC_API_KEY": "你的APIKey",
+  "MODEL_ID": "MiniMax-M2.5-highspeed",
+  "GITLAB_DEFAULT_TARGET": "dev",
+  "IDE_TOOL": "windsurf",
+  "PROJECTS_BASE_PATH": "/path/to/your/projects"
+}
 ```
-# 飞书应用配置
-APP_ID=你的飞书应用AppID
-APP_SECRET=你的飞书应用AppSecret
-VERIFICATION_TOKEN=你的验证Token
-ENCRYPT_KEY=你的加密Key
-
-# Anthropic/MiniMax API 配置
-ANTHROPIC_BASE_URL=https://api.minimaxi.com/anthropic
-ANTHROPIC_API_KEY=你的APIKey
-MODEL_ID=MiniMax-M2.5-highspeed
-
-# GitLab 配置
-GITLAB_DEFAULT_TARGET=dev
-
-# IDE 配置
-IDE_TOOL=windsurf
-
-# 项目配置
-PROJECTS_BASE_PATH=/Users/luoyi/Documents/1_project
 ```
 
 ### 3. 启动服务
@@ -241,7 +235,6 @@ feishu-agent/
 │   │   └── SKILL.md
 │   └── code-search/
 │       └── SKILL.md
-├── .env                  # 环境变量
 └── package.json
 ```
 
@@ -256,9 +249,11 @@ feishu-agent/
 
 ### 项目路径配置
 
-在 `.env` 中配置项目基础路径:
-```
-PROJECTS_BASE_PATH=/Users/luoyi/Documents/1_project
+在 `~/feishu-agent.json` 中配置项目基础路径:
+```json
+{
+  "PROJECTS_BASE_PATH": "/path/to/your/projects"
+}
 ```
 
 Agent 会自动扫描该目录下的所有项目(支持 3 层深度)。

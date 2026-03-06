@@ -1,59 +1,64 @@
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
-import dotenv from "dotenv";
-import { existsSync } from "fs";
+import { existsSync, readFileSync } from "fs";
+import os from "os";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+// 读取 ~/feishu-agent.json
+const globalConfigPath = os.homedir() + "/feishu-agent.json";
+let globalConfig = {};
 
-// 加载 .env 文件（优先根目录）
-const envPath = join(__dirname, "..", "..", ".env");
-if (existsSync(envPath)) {
-  dotenv.config({ path: envPath });
+if (existsSync(globalConfigPath)) {
+  try {
+    const content = readFileSync(globalConfigPath, "utf-8");
+    globalConfig = JSON.parse(content);
+    console.log("已加载全局配置文件:", globalConfigPath);
+  } catch (e) {
+    console.error("加载全局配置文件失败:", e.message);
+  }
 }
 
-// 备用：从 src 目录加载
-dotenv.config({ path: join(__dirname, "..", ".env") });
+// 辅助函数：从全局配置获取值
+function getConfig(key, defaultValue) {
+  return globalConfig[key] || defaultValue;
+}
 
 export default {
   // 飞书配置
   feishu: {
-    appId: process.env.APP_ID,
-    appSecret: process.env.APP_SECRET,
-    verificationToken: process.env.VERIFICATION_TOKEN,
-    encryptKey: process.env.ENCRYPT_KEY,
+    appId: getConfig("APP_ID"),
+    appSecret: getConfig("APP_SECRET"),
+    verificationToken: getConfig("VERIFICATION_TOKEN"),
+    encryptKey: getConfig("ENCRYPT_KEY"),
     apiBase: "https://open.feishu.cn/open-apis",
   },
 
   // Anthropic/MiniMax 配置
   anthropic: {
-    baseURL: process.env.ANTHROPIC_BASE_URL,
-    apiKey: process.env.ANTHROPIC_API_KEY,
-    model: process.env.MODEL_ID || "MiniMax-M2.5",
+    baseURL: getConfig("ANTHROPIC_BASE_URL", "https://api.minimaxi.com/anthropic"),
+    apiKey: getConfig("ANTHROPIC_API_KEY"),
+    model: getConfig("MODEL_ID", "MiniMax-M2.5"),
   },
 
   // 服务配置
   server: {
-    port: process.env.PORT || 3000,
+    port: parseInt(getConfig("PORT", "3000"), 10),
   },
 
   // GitLab 配置
   gitlab: {
-    defaultTargetBranch: process.env.GITLAB_DEFAULT_TARGET || "dev",
-    defaultProjectPath: process.env.GITLAB_DEFAULT_PROJECT_PATH,
+    defaultTargetBranch: getConfig("GITLAB_DEFAULT_TARGET", "dev"),
+    defaultProjectPath: getConfig("GITLAB_DEFAULT_PROJECT_PATH"),
   },
 
   // 项目配置
   projects: {
-    basePath: process.env.PROJECTS_BASE_PATH,
-    searchDepth: 3, // 递归搜索深度
-    cacheTimeout: 3600000, // 缓存 1 小时
+    basePath: getConfig("PROJECTS_BASE_PATH"),
+    searchDepth: 3,
+    cacheTimeout: 3600000,
     excludeDirs: ["node_modules", ".git", "dist", "build", ".next", "coverage"],
   },
 
   // IDE 配置
   ide: {
-    defaultTool: process.env.IDE_TOOL || "windsurf",
+    defaultTool: getConfig("IDE_TOOL", "windsurf"),
     supportedTools: ["windsurf", "cursor"],
   },
 };

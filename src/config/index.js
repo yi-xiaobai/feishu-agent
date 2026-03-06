@@ -36,4 +36,24 @@ export default {
   server: {
     port: process.env.PORT || 3000,
   },
+
+  // GitLab 配置
+  gitlab: {
+    defaultTargetBranch: process.env.GITLAB_DEFAULT_TARGET || "dev",
+    defaultProjectPath: "lanhuapp", // GitLab 组织/用户名
+  },
+
+  // 项目配置
+  projects: {
+    basePath: process.env.PROJECTS_BASE_PATH || "/Users/luoyi/Documents/1_project",
+    searchDepth: 3, // 递归搜索深度
+    cacheTimeout: 3600000, // 缓存 1 小时
+    excludeDirs: ["node_modules", ".git", "dist", "build", ".next", "coverage"],
+  },
+
+  // IDE 配置
+  ide: {
+    defaultTool: process.env.IDE_TOOL || "windsurf",
+    supportedTools: ["windsurf", "cursor"],
+  },
 };

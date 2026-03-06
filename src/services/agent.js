@@ -3,6 +3,7 @@ import config from "../config/index.js";
 import { TOOLS } from "../tools/definitions.js";
 import { TOOL_HANDLERS } from "../tools/handlers.js";
 import { setWorkDir } from "../tools/index.js";
+import { skillLoader } from "../utils/skills.js";
 
 const { anthropic: anthropicConfig } = config;
 
@@ -12,7 +13,27 @@ const client = new Anthropic({
   apiKey: anthropicConfig.apiKey,
 });
 
-const SYSTEM = `你是一个编程助手，使用提供的工具来完成任务。行动而不是解释。`;
+// Layer 1: 简洁的系统提示词 + Skills 元数据
+const SYSTEM = `你是一个强大的编程助手,可以帮助用户完成完整的开发工作流。
+
+核心能力:
+- 项目管理 - 扫描、切换项目,支持多项目搜索
+- 代码搜索 - 在单个或多个项目中搜索代码
+- 文件操作 - 读取、编辑、删除文件
+- Git 操作 - 查看状态、创建分支、提交、推送
+- GitLab 集成 - 创建 MR、获取版本信息
+- IDE 集成 - 在 Windsurf 或 Cursor 中打开项目
+
+专业技能 (使用 load_skill 按需加载):
+${skillLoader.getDescriptions()}
+
+重要原则:
+- 遇到复杂任务时,先使用 load_skill 加载相关专业知识
+- 始终主动完成任务,不要等待用户多次确认
+- 在执行危险操作前要谨慎
+- 提供清晰的执行日志,让用户了解进度
+
+行动而不是解释。`;
 
 // ============ 会话管理 ============
 const sessions = new Map();

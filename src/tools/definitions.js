@@ -60,4 +60,83 @@ export const TOOLS = [
       required: ["pattern"],
     },
   },
+
+  // ============ 项目管理工具 ============
+  {
+    name: "find_projects",
+    description: "Scan and list all available projects in the workspace.",
+    input_schema: {
+      type: "object",
+      properties: {
+        refresh: { type: "boolean", description: "Force refresh cache" },
+      },
+    },
+  },
+  {
+    name: "open_project",
+    description: "Switch to a specific project by name.",
+    input_schema: {
+      type: "object",
+      properties: {
+        name: { type: "string", description: "Project name (e.g., 'master-web')" },
+      },
+      required: ["name"],
+    },
+  },
+  {
+    name: "search_code",
+    description: "Search for code in current project.",
+    input_schema: {
+      type: "object",
+      properties: {
+        keyword: { type: "string", description: "Search keyword or pattern" },
+        file_pattern: { type: "string", description: "File pattern filter (e.g., '*.js', '*.tsx')" },
+        max_results: { type: "integer", description: "Maximum results to return (default: 50)" },
+      },
+      required: ["keyword"],
+    },
+  },
+  {
+    name: "search_all_projects",
+    description: "Search for code across all projects.",
+    input_schema: {
+      type: "object",
+      properties: {
+        keyword: { type: "string", description: "Search keyword or pattern" },
+        project_filter: { type: "string", description: "Filter by project name (optional)" },
+        max_results: { type: "integer", description: "Maximum results per project (default: 20)" },
+      },
+      required: ["keyword"],
+    },
+  },
+
+  // ============ IDE 工具 ============
+  {
+    name: "open_in_ide",
+    description: "Open file or project in IDE (Windsurf or Cursor).",
+    input_schema: {
+      type: "object",
+      properties: {
+        path: { type: "string", description: "File or directory path to open" },
+        ide: { type: "string", description: "IDE to use: 'windsurf' or 'cursor' (default: windsurf)" },
+      },
+      required: ["path"],
+    },
+  },
+
+  // ============ Skills 系统 ============
+  {
+    name: "load_skill",
+    description: "Load specialized knowledge and workflow guidance by skill name. Use this before tackling complex tasks.",
+    input_schema: {
+      type: "object",
+      properties: {
+        name: {
+          type: "string",
+          description: "Skill name to load (e.g., 'git-workflow', 'project-management', 'gitlab-mr', 'code-search')",
+        },
+      },
+      required: ["name"],
+    },
+  },
 ];

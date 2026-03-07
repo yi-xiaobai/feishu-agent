@@ -22,12 +22,30 @@ bash { command: "git branch --show-current" }
 **目的**: 了解当前工作区状态,避免在错误的分支上操作。
 
 ### 2. 创建或切换分支(如需要)
-```
-创建新功能分支:
-bash { command: "git checkout -b feature/xxx" }
 
-切换到已有分支:
+**切换分支前先检查**:
+```
+bash { command: "git status --short" }  # 查看当前状态
+bash { command: "git branch -a" }       # 查看所有分支
+```
+
+**切换到已有分支**:
+```
+bash { command: "git checkout master" }
+# 或
+bash { command: "git checkout main" }
+# 或
 bash { command: "git checkout 分支名" }
+```
+
+**强制切换（放弃本地修改）**:
+```
+bash { command: "git checkout -f master" }
+```
+
+**创建新功能分支**:
+```
+bash { command: "git checkout -b feature/xxx" }
 ```
 
 **分支命名规范**:

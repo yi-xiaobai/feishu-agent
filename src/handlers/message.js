@@ -6,12 +6,28 @@ import { setWorkspace } from "../services/agent.js";
 const WORKDIR = "/Users/luoyi/Documents/1_project";
 setWorkspace(WORKDIR);
 
+// 消息去重
+const processedMessages = new Set();
+
 /**
  * 处理飞书消息事件
  * @param {object} data - 消息事件数据
  */
 export async function handleMessage(data) {
   const { message, sender } = data;
+  const messageId = message.message_id;
+
+  // 消息去重
+  if (processedMessages.has(messageId)) {
+    console.log(`⏭️ 跳过重复消息: ${messageId}`);
+    return;
+  }
+  processedMessages.add(messageId);
+
+  // 防止内存泄漏
+  if (processedMessages.size > 1000) {
+    processedMessages.clear();
+  }
   const chatId = message.chat_id;
   const messageType = message.message_type;
 

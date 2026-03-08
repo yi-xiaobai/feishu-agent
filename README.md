@@ -4,13 +4,25 @@
 
 ## 功能特性
 
-- WebSocket 长连接模式，无需公网回调
-- 集成 Claude/MiniMax AI 能力
-- Shell 命令、文件操作
-- 多项目管理、代码搜索
-- Git 工作流、GitHub/GitLab MR
-- IDE 集成（Windsurf/Cursor）
-- Skills 按需加载专业知识
+- **WebSocket 长连接**：无需公网回调，通过飞书长连接模式接收消息
+- **AI 集成**：支持 Claude/MiniMax 模型，理解自然语言并执行操作
+- **文件操作**：读取、写入、编辑文件
+- **Shell 命令**：在workspace中执行终端命令
+- **项目管理**：扫描并切换项目，多项目代码搜索
+- **IDE 集成**：一键在 Windsurf/Cursor 中打开文件或项目
+- **Skills 系统**：按需加载专业知识（Git工作流、项目管理、代码搜索等）
+
+## 支持的工具
+
+| 工具 | 功能 |
+|------|------|
+| `bash` | 执行 Shell 命令 |
+| `read_file` / `write_file` / `edit_file` | 文件读写编辑 |
+| `find_file` | 按文件名搜索文件 |
+| `find_projects` / `open_project` | 项目扫描与切换 |
+| `search_code` / `search_all_projects` | 单项目/全项目代码搜索 |
+| `open_in_ide` | 在 Windsurf/Cursor 中打开 |
+| `load_skill` | 加载专业知识库 |
 
 ## 快速开始
 
@@ -49,6 +61,24 @@ yarn dev
 2. 添加权限：`im:message:send_as_bot`、`im:message:receive_v1`
 3. 事件订阅：添加 `im.message.receive_v1`，选择「长连接」模式
 4. 发布应用
+
+## 使用示例
+
+与 Agent 对话即可完成各种开发任务：
+
+```
+用户: 列出当前所有项目
+Agent: [扫描 projects 目录，返回项目列表]
+
+用户: 切换到 master-web 项目
+Agent: [切换工作目录到 master-web]
+
+用户: 搜索 "userService" 相关的代码
+Agent: [在当前项目中搜索，返回匹配结果]
+
+用户: 在 Windsurf 中打开 src/index.js
+Agent: [调用 open_in_ide 工具打开文件]
+```
 
 ## MCP 配置
 

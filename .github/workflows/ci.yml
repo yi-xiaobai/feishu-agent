@@ -7,9 +7,30 @@ on:
     branches: [main, master, dev]
 
 jobs:
+  lint:
+    name: Lint Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'yarn'
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Check for syntax errors
+        run: node --check src/index.js
+
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    needs: lint
 
     strategy:
       matrix:
@@ -30,23 +51,3 @@ jobs:
 
       - name: Run tests
         run: yarn test
-
-  lint:
-    name: Lint Check
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          cache: 'yarn'
-
-      - name: Install dependencies
-        run: yarn install --frozen-lockfile
-
-      - name: Check for syntax errors
-        run: node --check src/index.js

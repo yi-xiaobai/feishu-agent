@@ -1,6 +1,6 @@
 stages:
-  - test
   - lint
+  - test
 
 variables:
   NODE_VERSION: "20"
@@ -15,34 +15,6 @@ default:
       - node_modules/
       - .yarn/cache/
 
-# 单元测试
-test:
-  stage: test
-  script:
-    - yarn install --frozen-lockfile
-    - yarn test
-  coverage: '/All files[^|]*\|[^|]*\s+([\d\.]+)/'
-  artifacts:
-    when: always
-    reports:
-      junit: junit.xml
-    paths:
-      - coverage/
-    expire_in: 7 days
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH == "main"
-    - if: $CI_COMMIT_BRANCH == "master"
-    - if: $CI_COMMIT_BRANCH == "dev"
-
-# 多版本测试
-test:node18:
-  extends: test
-  variables:
-    NODE_VERSION: "18"
-  rules:
-    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-
 # 语法检查
 lint:
   stage: lint
@@ -56,3 +28,23 @@ lint:
     - if: $CI_COMMIT_BRANCH == "main"
     - if: $CI_COMMIT_BRANCH == "master"
     - if: $CI_COMMIT_BRANCH == "dev"
+
+# 单元测试
+test:
+  stage: test
+  script:
+    - yarn install --frozen-lockfile
+    - yarn test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH == "main"
+    - if: $CI_COMMIT_BRANCH == "master"
+    - if: $CI_COMMIT_BRANCH == "dev"
+
+# 多版本测试
+test:node18:
+  extends: test
+  variables:
+    NODE_VERSION: "18"
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"

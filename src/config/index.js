@@ -49,4 +49,6 @@ export default {
   retry: {
     maxRetries: getConfig("MAX_RETRIES", 3),
   },
+
+  projectPath: getConfig("PROJECT_PATH", ""),
 };

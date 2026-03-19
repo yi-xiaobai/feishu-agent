@@ -16,6 +16,7 @@ import config from './config/index.js';
 
 // 默认配置（只保留飞书通知，其他由 Agent 自动识别）
 const DEFAULT_CONFIG = {
+  projectPath: config.projectPath,
   feishuWebhook: config.feishu.webhook,
   notifyUser: config.feishu.notifyUser
 };

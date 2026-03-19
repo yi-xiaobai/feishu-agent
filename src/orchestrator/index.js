@@ -103,6 +103,16 @@ export async function runOrchestrator(taskConfig) {
     taskManager.updateResult(task.id, 'prdSummary', prdResult);
     console.log(`  ✓ 需求摘要: ${prdResult.summary}`);
 
+    // 如果 PRD 分析结果表明不需要改代码，直接返回分析结果
+    if (prdResult.noCodeChange) {
+      console.log('\n📋 无需修改代码，直接返回分析结果');
+      taskManager.updateStatus(task.id, TaskStatus.COMPLETED, '需求分析完成，无需代码修改');
+      
+      const finalTask = taskManager.load(task.id);
+      await sendFeishuNotify(task.feishuWebhook, buildResultMessage(finalTask), task.notifyUser);
+      return finalTask;
+    }
+
     // ========== 阶段 2: 代码修改 ==========
     console.log('\n💻 阶段 2: 修改代码...');
     taskManager.updateStatus(task.id, TaskStatus.CODING, '正在修改代码');

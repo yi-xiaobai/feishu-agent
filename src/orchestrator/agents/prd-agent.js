@@ -18,7 +18,8 @@ const client = new Anthropic({
 const SYSTEM = `你是一个 PRD 解析专家。你的任务是：
 1. 读取和理解需求文档或问题描述
 2. 提取关键信息：问题描述、期望行为、影响范围
-3. 生成验证步骤：用于 E2E 测试验证问题是否解决
+3. 判断是否需要修改代码（如果只是咨询、分析、建议类问题，则不需要改代码）
+4. 如果需要改代码，生成验证步骤用于 E2E 测试
 
 输出格式（JSON）：
 {
@@ -26,6 +27,8 @@ const SYSTEM = `你是一个 PRD 解析专家。你的任务是：
   "problem": "当前问题或需要实现的功能",
   "expected": "期望的行为或结果",
   "scope": ["受影响的文件或模块"],
+  "noCodeChange": false,
+  "reason": "如果 noCodeChange 为 true，说明为什么不需要改代码",
   "verifySteps": [
     {
       "description": "验证步骤描述",
@@ -34,6 +37,10 @@ const SYSTEM = `你是一个 PRD 解析专家。你的任务是：
     }
   ]
 }
+
+注意：
+- noCodeChange: true 表示这是一个咨询/分析/建议类问题，不需要修改代码
+- noCodeChange: false 表示需要修改代码来解决问题
 
 如果输入是 URL，先读取内容再解析。
 如果输入是纯文本描述，直接解析。`;

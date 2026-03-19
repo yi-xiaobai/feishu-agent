@@ -109,9 +109,14 @@ async function interactiveInput() {
   const config = { ...DEFAULT_CONFIG };
 
   // 必填项
-  config.prd = await question('📝 需求描述 (或 PRD 链接): ');
-  if (!config.prd) {
-    console.log('❌ 需求描述不能为空');
+  config.prd = await question('📝 需求描述 (或 PRD 链接，输入 exit 退出): ');
+  if (!config.prd || config.prd.toLowerCase() === 'exit') {
+    if (config.prd?.toLowerCase() === 'exit') {
+      console.log('👋 再见！');
+    } else {
+      // 提示用户输入需求描述
+      console.log('❌ 需求描述不能为空');
+    }
     rl.close();
     return null;
   }

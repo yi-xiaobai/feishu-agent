@@ -128,16 +128,11 @@ async function interactiveInput() {
 
   config.name = await question('📌 任务名称 (可选): ') || '自动化任务';
 
-  // 可选项
-  config.projectPath = await question('📁 项目路径: ');
-  if (!config.projectPath) {
-    console.log('❌ 项目路径不能为空');
-    rl.close();
-    return null;
-  }
+  // 项目路径：优先使用配置文件中的，否则使用当前工作目录
+  config.projectPath = config.projectPath || process.cwd();
+  console.log(`📁 项目路径: ${config.projectPath}`);
 
-  const customBranch = await question('🌿 分支名 (可选，留空自动生成): ');
-  if (customBranch) config.branch = customBranch;
+  // 分支名由 Agent 自动生成，不再询问用户
 
   const customWebhook = await question('🔔 飞书 Webhook (可选): ');
   if (customWebhook) config.feishuWebhook = customWebhook;

@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/cli.js",
     "cli": "node src/cli.js",
-    "task": "node src/cli.js --task"
+    "task": "node src/cli.js --task",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "keywords": ["agent", "automation", "playwright", "claude"],
   "author": "",
@@ -16,5 +17,8 @@
     "@anthropic-ai/sdk": "^0.78.0",
     "axios": "^1.13.6",
     "playwright": "^1.52.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
   }
 }

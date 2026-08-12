@@ -1,6 +1,6 @@
 /**
  * orchestrator/index.js - 主协调器
- * 
+ *
  * 协调多个子 Agent 完成自动化开发流程：
  * PRD 解析 → 代码修改 → E2E 验证 → Git 提交 → 飞书通知
  */
@@ -25,7 +25,7 @@ async function sendFeishuNotify(webhook, message, notifyUser = '') {
   }
 
   try {
-    const content = notifyUser 
+    const content = notifyUser
       ? `${message}\n\n@${notifyUser} 请查收`
       : message;
 
@@ -107,7 +107,7 @@ export async function runOrchestrator(taskConfig) {
     if (prdResult.noCodeChange) {
       console.log('\n📋 无需修改代码，直接返回分析结果');
       taskManager.updateStatus(task.id, TaskStatus.COMPLETED, '需求分析完成，无需代码修改');
-      
+
       const finalTask = taskManager.load(task.id);
       await sendFeishuNotify(task.feishuWebhook, buildResultMessage(finalTask), task.notifyUser);
       return finalTask;
@@ -150,7 +150,7 @@ export async function runOrchestrator(taskConfig) {
         { ...prdResult, problem: `${prdResult.problem}\n\n上次验证失败原因: ${e2eResult.message}` },
         task.projectPath
       );
-      
+
       if (newModifiedFiles.length > 0) {
         taskManager.updateResult(task.id, 'modifiedFiles', [
           ...modifiedFiles,

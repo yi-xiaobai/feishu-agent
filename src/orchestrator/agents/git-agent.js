@@ -1,6 +1,6 @@
 /**
  * git-agent.js - Git 操作子 Agent
- * 
+ *
  * 负责创建分支、提交代码、推送到远端
  */
 
@@ -135,30 +135,30 @@ function createToolHandlers(projectPath) {
 
   return {
     git_status: async () => runGit("status"),
-    
+
     git_diff: async ({ file }) => {
       const cmd = file ? `diff ${file}` : "diff";
       return runGit(cmd);
     },
-    
+
     git_branch: async ({ name, create }) => {
       if (create) {
         return runGit(`checkout -b ${name}`);
       }
       return runGit(`checkout ${name}`);
     },
-    
+
     git_add: async ({ files }) => runGit(`add ${files}`),
-    
+
     git_commit: async ({ message }) => runGit(`commit -m "${message.replace(/"/g, '\\"')}"`),
-    
+
     git_push: async ({ remote = "origin", branch, set_upstream }) => {
-      const cmd = set_upstream 
+      const cmd = set_upstream
         ? `push -u ${remote} ${branch}`
         : `push ${remote} ${branch}`;
       return runGit(cmd);
     },
-    
+
     git_log: async ({ count = 5 }) => runGit(`log --oneline -n ${count}`)
   };
 }

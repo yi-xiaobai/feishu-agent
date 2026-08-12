@@ -1,6 +1,6 @@
 /**
  * lib/tools.js - 通用工具函数
- * 
+ *
  * 供各个 Agent 复用的工具函数
  */
 
@@ -8,6 +8,11 @@ import { exec } from "child_process";
 import { promisify } from "util";
 import * as fs from "fs/promises";
 import * as path from "path";
+import { hooks } from "../services/hooks.js";
+import { checkPermission } from "../services/permissions.js";
+import { cheapCompact, emergencyCompact, estimateTokens } from "../services/context.js";
+import { getSystemPrompt } from "../services/prompt.js";
+import { memoryStore } from "../services/memory.js";
 
 export const execAsync = promisify(exec);
 
@@ -17,9 +22,10 @@ export const execAsync = promisify(exec);
  * @returns {function} - 路径检查函数
  */
 export function createSafePath(basePath) {
+  const resolvedBase = path.resolve(basePath);
   return (p) => {
-    const fullPath = path.resolve(basePath, p);
-    if (!fullPath.startsWith(basePath)) {
+    const fullPath = path.resolve(resolvedBase, p);
+    if (fullPath !== resolvedBase && !fullPath.startsWith(`${resolvedBase}${path.sep}`)) {
       throw new Error(`Path escapes workspace: ${p}`);
     }
     return fullPath;
@@ -33,11 +39,11 @@ export function createSafePath(basePath) {
  * @param {object} options - 选项
  */
 export async function runCommand(command, cwd, options = {}) {
-  const dangerous = ["rm -rf /", "sudo", "shutdown", "reboot"];
-  if (dangerous.some(d => command.includes(d))) {
+  const permission = checkPermission("bash", { command }, { workDir: cwd });
+  if (permission.behavior !== "allow") {
     return "Error: Dangerous command blocked";
   }
-  
+
   try {
     const { stdout, stderr } = await execAsync(command, {
       cwd,
@@ -158,16 +164,32 @@ export async function runAgentLoop(client, options) {
     onToolCall = () => {}
   } = options;
 
+  let activeMessages = structuredClone(messages);
+  const workDir = options.workDir || process.cwd();
+  memoryStore.setBaseDir(workDir);
+
   for (let i = 0; i < maxIterations; i++) {
+    activeMessages = cheapCompact(activeMessages, workDir);
+    if (estimateTokens(activeMessages) > 80000) {
+      activeMessages = emergencyCompact(activeMessages);
+    }
+    const latestUser = [...activeMessages].reverse().find(message => message.role === "user" && typeof message.content === "string")?.content || "";
+    const assembledSystem = getSystemPrompt({
+      tools: tools.map(({ name }) => ({ name })),
+      workDir,
+      skills: "",
+      memoryIndex: memoryStore.getIndex(),
+      relevantMemories: memoryStore.formatRelevant(latestUser),
+    });
     const response = await client.messages.create({
       model,
-      system,
-      messages,
+      system: `${system}\n\n${assembledSystem}`,
+      messages: activeMessages,
       tools,
       max_tokens: maxTokens
     });
 
-    messages.push({ role: "assistant", content: response.content });
+    activeMessages.push({ role: "assistant", content: response.content });
 
     if (response.stop_reason !== "tool_use") {
       const textBlocks = response.content.filter(b => b.type === "text");
@@ -177,15 +199,22 @@ export async function runAgentLoop(client, options) {
     const results = [];
     for (const block of response.content) {
       if (block.type === "tool_use") {
+        const decision = checkPermission(block.name, block.input, { workDir });
+        const blocked = decision.behavior === "allow"
+          ? await hooks.trigger("PreToolUse", block, { workDir })
+          : `Permission ${decision.behavior === "deny" ? "denied" : "approval required"}: ${decision.reason}`;
         const handler = handlers[block.name];
         let output;
         try {
-          output = handler ? await handler(block.input) : `Unknown tool: ${block.name}`;
+          output = blocked
+            ? String(blocked)
+            : handler ? await handler(block.input) : `Unknown tool: ${block.name}`;
         } catch (e) {
           output = `Error: ${e.message}`;
         }
 
         onToolCall(block.name, block.input, output);
+        await hooks.trigger("PostToolUse", block, output, { workDir });
 
         results.push({
           type: "tool_result",
@@ -194,7 +223,7 @@ export async function runAgentLoop(client, options) {
         });
       }
     }
-    messages.push({ role: "user", content: results });
+    activeMessages.push({ role: "user", content: results });
   }
 
   return null;

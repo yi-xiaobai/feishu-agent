@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * cli.js - 命令行入口
- * 
+ *
  * 用法:
  *   node src/cli.js --task ./task.json    # 执行任务
  *   node src/cli.js --status <task_id>    # 查看任务状态
@@ -30,7 +30,7 @@ function parseArgs() {
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
-    
+
     if (arg === '--task' || arg === '-t') {
       result.command = 'task';
       result.taskFile = args[++i];
@@ -112,17 +112,17 @@ async function interactiveInput() {
   // 必填项 - 循环直到用户输入有效内容或 exit
   while (true) {
     config.prd = (await question('📝 需求描述 (或 PRD 链接，输入 exit 退出): ')).trim();
-    
+
     if (config.prd.toLowerCase() === 'exit') {
       console.log('👋 再见！');
       rl.close();
       return null;
     }
-    
+
     if (config.prd) {
       break; // 有效输入，继续
     }
-    
+
     console.log('⚠️  需求描述不能为空，请重新输入');
   }
 
@@ -159,15 +159,15 @@ async function executeTask(config) {
   console.log('📊 执行结果:');
   console.log(`   状态: ${result.status}`);
   console.log(`   任务 ID: ${result.id}`);
-  
+
   if (result.result.modifiedFiles?.length > 0) {
     console.log(`   修改文件: ${result.result.modifiedFiles.join(', ')}`);
   }
-  
+
   if (result.result.gitCommit) {
     console.log(`   提交: ${result.result.gitCommit}`);
   }
-  
+
   if (result.error) {
     console.log(`   错误: ${result.error}`);
   }

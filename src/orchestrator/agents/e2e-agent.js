@@ -1,6 +1,6 @@
 /**
  * e2e-agent.js - E2E 验证子 Agent
- * 
+ *
  * 负责启动项目并使用 Playwright 进行自动化验证
  */
 
@@ -60,7 +60,7 @@ try {
  */
 async function waitForServer(url, timeout = 60000) {
   const startTime = Date.now();
-  
+
   while (Date.now() - startTime < timeout) {
     try {
       const response = await fetch(url);
@@ -72,7 +72,7 @@ async function waitForServer(url, timeout = 60000) {
     }
     await new Promise(resolve => setTimeout(resolve, 2000));
   }
-  
+
   throw new Error(`Server not ready after ${timeout}ms`);
 }
 
@@ -82,7 +82,7 @@ async function waitForServer(url, timeout = 60000) {
 function startDevServer(projectPath, startCmd) {
   return new Promise((resolve, reject) => {
     const [cmd, ...args] = startCmd.split(' ');
-    
+
     const proc = spawn(cmd, args, {
       cwd: projectPath,
       stdio: ['ignore', 'pipe', 'pipe'],
@@ -91,7 +91,7 @@ function startDevServer(projectPath, startCmd) {
     });
 
     let output = '';
-    
+
     proc.stdout.on('data', (data) => {
       output += data.toString();
       // 检测服务启动成功的标志
@@ -216,10 +216,10 @@ function createToolHandlers(projectPath, taskId) {
         // 创建临时测试文件
         const testFile = path.join(projectPath, `.e2e-test-${Date.now()}.mjs`);
         const screenshotPath = path.join(screenshotsDir, screenshot_name || `${taskId}-${Date.now()}.png`);
-        
+
         // 替换截图路径
         const finalScript = script.replace(/screenshot\.png/g, screenshotPath);
-        
+
         await fs.writeFile(testFile, finalScript, 'utf-8');
 
         try {
@@ -230,7 +230,7 @@ function createToolHandlers(projectPath, taskId) {
           });
 
           const output = stdout + stderr;
-          
+
           // 清理临时文件
           await fs.unlink(testFile).catch(() => {});
 
@@ -244,7 +244,7 @@ function createToolHandlers(projectPath, taskId) {
           } else if (output.includes('TEST_FAILED')) {
             return `TEST_FAILED\n${output}`;
           }
-          
+
           return output.slice(0, 5000);
         } catch (error) {
           await fs.unlink(testFile).catch(() => {});
@@ -309,7 +309,7 @@ export async function runE2eAgent(prdResult, projectPath, taskId) {
   const tools = createTools(projectPath, taskId);
   const handlers = createToolHandlers(projectPath, taskId);
 
-  const verifyStepsText = prdResult.verifySteps?.map((step, i) => 
+  const verifyStepsText = prdResult.verifySteps?.map((step, i) =>
     `${i + 1}. ${step.description}\n   操作: ${step.action}\n   断言: ${step.assertion}`
   ).join('\n') || '无具体验证步骤，请根据需求描述自行设计验证方案';
 
@@ -357,7 +357,7 @@ ${verifyStepsText}
       const text = textBlocks.map(b => b.text).join("\n");
 
       const passed = text.includes('TEST_PASSED') || text.includes('通过') || text.includes('成功');
-      
+
       return {
         passed,
         message: text

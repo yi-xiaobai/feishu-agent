@@ -1,6 +1,6 @@
 /**
  * task-manager.js - 任务状态管理
- * 
+ *
  * 任务持久化到 .tasks/ 目录，支持进度追踪和状态查询
  */
 
@@ -79,15 +79,15 @@ class TaskManager {
       feishuWebhook: taskConfig.feishuWebhook || '',
       notifyUser: taskConfig.notifyUser || '',
       // startCmd, devUrl, gitRemote 由 Agent 运行时自动识别，不再作为配置
-      
+
       // 状态信息
       status: TaskStatus.PENDING,
       createdAt: now,
       updatedAt: now,
-      
+
       // 进度记录
       progress: [],
-      
+
       // 结果
       result: {
         prdSummary: null,
@@ -97,7 +97,7 @@ class TaskManager {
         gitCommit: null,
         mrUrl: null
       },
-      
+
       // 错误信息
       error: null,
       retryCount: 0
@@ -183,7 +183,7 @@ class TaskManager {
    */
   listAll() {
     const files = readdirSync(this.dir).filter(f => f.startsWith('task_') && f.endsWith('.json'));
-    
+
     if (files.length === 0) {
       return [];
     }

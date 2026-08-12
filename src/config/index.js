@@ -1,6 +1,6 @@
 /**
  * config/index.js - 配置管理
- * 
+ *
  * 只保留必要的全局配置（API Key 等）
  * startCmd / devUrl / gitRemote 等项目相关配置由 Agent 运行时自己识别
  */

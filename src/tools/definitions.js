@@ -139,4 +139,53 @@ export const TOOLS = [
       required: ["name"],
     },
   },
+  {
+    name: "todo_write",
+    description: "Create or update the current task plan. Use for multi-step work.",
+    input_schema: {
+      type: "object",
+      properties: {
+        todos: {
+          type: "array",
+          items: {
+            type: "object",
+            properties: {
+              content: { type: "string" },
+              status: { type: "string", enum: ["pending", "in_progress", "completed"] },
+            },
+            required: ["content", "status"],
+          },
+        },
+      },
+      required: ["todos"],
+    },
+  },
+  {
+    name: "task",
+    description: "Delegate an independent subtask to an isolated subagent and return only its conclusion.",
+    input_schema: {
+      type: "object",
+      properties: { description: { type: "string" } },
+      required: ["description"],
+    },
+  },
+  {
+    name: "compact",
+    description: "Compact older conversation context while preserving recent work.",
+    input_schema: { type: "object", properties: {} },
+  },
+  {
+    name: "memory_write",
+    description: "Persist an important user preference, feedback, project fact, or reference across sessions.",
+    input_schema: {
+      type: "object",
+      properties: {
+        name: { type: "string" },
+        description: { type: "string" },
+        type: { type: "string", enum: ["user", "feedback", "project", "reference"] },
+        body: { type: "string" },
+      },
+      required: ["name", "description", "type", "body"],
+    },
+  },
 ];

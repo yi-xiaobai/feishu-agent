@@ -11,6 +11,13 @@
 - **项目管理**：扫描并切换项目，多项目代码搜索
 - **IDE 集成**：一键在 Windsurf/Cursor 中打开文件或项目
 - **Skills 系统**：按需加载专业知识（Git工作流、项目管理、代码搜索等）
+- **权限管线（s03）**：工具执行前区分直接允许、需要审批、永久拒绝；飞书场景默认拒绝无法交互审批的风险操作
+- **生命周期 Hooks（s04）**：支持 `UserPromptSubmit`、`PreToolUse`、`PostToolUse`、`Stop` 扩展点
+- **任务规划（s05）**：`todo_write` 维护长任务进度，连续多轮未规划时自动提醒
+- **子 Agent（s06）**：`task` 使用独立上下文执行子任务，只把结论带回主会话，并禁止递归派生
+- **上下文压缩（s08）**：消息裁剪、旧工具结果占位、大输出落盘、阈值摘要及超长错误应急压缩
+- **持久记忆（s09）**：工作区 `.memory/` 文件仓库与 `MEMORY.md` 索引，相关记忆按需注入
+- **动态系统提示（s10）**：依据当前工作区、工具、Skills 和记忆实时组装并缓存
 
 ## 支持的工具
 
@@ -23,6 +30,36 @@
 | `search_code` / `search_all_projects` | 单项目/全项目代码搜索 |
 | `open_in_ide` | 在 Windsurf/Cursor 中打开 |
 | `load_skill` | 加载专业知识库 |
+| `todo_write` | 创建、更新当前任务计划 |
+| `task` | 在隔离上下文中执行独立子任务 |
+| `compact` | 主动压缩当前对话上下文 |
+| `memory_write` | 持久保存偏好、反馈、项目事实或引用 |
+
+## Agent Harness（s03–s10）
+
+本项目参考 Learn Claude Code 的 [s03 Permission](https://learn.shareai.run/zh/s03/) 至 [s10 System Prompt](https://learn.shareai.run/zh/s10/)，结合飞书机器人和 Node.js 架构完成整合：
+
+1. 用户消息先触发 `UserPromptSubmit` Hook。
+2. 每轮调用前按“大结果落盘 → 消息裁剪 → 旧结果占位”的顺序压缩上下文；仍超阈值时调用模型摘要。
+3. 系统提示根据当前工具、工作目录、Skills 目录和记忆索引动态组装。
+4. 每个工具调用先触发 `PreToolUse`。永久禁止规则直接拦截；风险操作需要审批。当前飞书文本通道没有交互式审批回调，因此风险操作默认拒绝。
+5. 工具执行后触发 `PostToolUse`，Agent 停止前触发 `Stop`。
+
+复杂任务可使用 `todo_write` 显式维护计划，或使用 `task` 派生具有全新消息历史的子 Agent。子 Agent 共享工作区文件副作用，但没有 `task` 工具，不能递归派生。
+
+### 记忆目录
+
+调用 `memory_write` 后会在当前项目生成：
+
+```text
+.memory/
+├── MEMORY.md          # 常驻系统提示的轻量索引
+└── <memory-name>.md   # 带 name/description/type frontmatter 的详细记忆
+```
+
+四种记忆类型为 `user`、`feedback`、`project` 和 `reference`。详细内容只在与当前请求相关时注入，避免长期占用上下文。
+
+大于上下文预算的工具结果会写入 `.task_outputs/tool-results/`；这些目录属于 Agent 的运行时数据，可按项目需要加入 `.gitignore`。
 
 ## 快速开始
 
@@ -34,7 +71,7 @@ yarn install
 
 ### 2. 配置
 
-创建 `~/feishu-agent.json`：
+创建 `~/engineer-claw.json`：
 
 ```json
 {
@@ -102,9 +139,14 @@ feishu-agent/
 │   ├── handlers/
 │   │   └── message.js       # 消息处理
 │   ├── services/
-│   │   ├── agent.js         # AI Agent
+│   │   ├── agent.js         # AI Agent 与子 Agent 循环
 │   │   ├── feishu.js        # 飞书 SDK
-│   │   └── mcp-client.js    # MCP 客户端
+│   │   ├── mcp-client.js    # MCP 客户端
+│   │   ├── permissions.js   # 权限决策管线
+│   │   ├── hooks.js         # 生命周期 Hooks
+│   │   ├── context.js       # 上下文压缩
+│   │   ├── memory.js        # 持久记忆
+│   │   └── prompt.js        # 动态系统提示组装
 │   ├── tools/
 │   │   ├── definitions.js   # 工具定义
 │   │   ├── handlers.js      # 工具处理

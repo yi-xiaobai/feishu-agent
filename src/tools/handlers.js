@@ -1,5 +1,12 @@
 import * as tools from "./index.js";
 import { skillLoader } from "../utils/skills.js";
+import { memoryStore } from "../services/memory.js";
+
+let currentTodos = [];
+
+export function getCurrentTodos() {
+  return structuredClone(currentTodos);
+}
 
 /**
  * 工具处理器映射
@@ -25,4 +32,10 @@ export const TOOL_HANDLERS = {
 
   // Skills 系统
   load_skill: ({ name }) => skillLoader.getContent(name),
+  todo_write: ({ todos }) => {
+    currentTodos = todos;
+    const icons = { pending: " ", in_progress: "▸", completed: "✓" };
+    return `Current tasks:\n${todos.map((todo) => `[${icons[todo.status]}] ${todo.content}`).join("\n")}`;
+  },
+  memory_write: (memory) => memoryStore.write(memory),
 };

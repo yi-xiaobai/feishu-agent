@@ -3,6 +3,7 @@ import { promisify } from "util";
 import * as fs from "fs/promises";
 import * as path from "path";
 import config from "../config/index.js";
+import { checkPermission } from "../services/permissions.js";
 import {
   scanAllProjects,
   findProjectPath,
@@ -18,7 +19,11 @@ let workDir = process.cwd();
  * 设置工作目录
  */
 export function setWorkDir(dir) {
-  workDir = dir;
+  workDir = path.resolve(dir);
+}
+
+export function getWorkDir() {
+  return workDir;
 }
 
 /**
@@ -26,7 +31,7 @@ export function setWorkDir(dir) {
  */
 function safePath(p) {
   const fullPath = path.resolve(workDir, p);
-  if (!fullPath.startsWith(workDir)) {
+  if (fullPath !== workDir && !fullPath.startsWith(`${workDir}${path.sep}`)) {
     throw new Error(`Path escapes workspace: ${p}`);
   }
   return fullPath;
@@ -36,11 +41,9 @@ function safePath(p) {
  * 执行 bash 命令
  */
 export async function runBash(command) {
-  const dangerous = ["rm -rf /", "sudo", "shutdown", "reboot", "> /dev/"];
-  if (dangerous.some((d) => command.includes(d))) {
+  if (checkPermission("bash", { command }, { workDir }).behavior === "deny") {
     return "Error: Dangerous command blocked";
   }
-
   try {
     const { stdout, stderr } = await execAsync(command, {
       cwd: workDir,
